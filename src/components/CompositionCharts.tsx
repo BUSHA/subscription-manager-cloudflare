@@ -123,7 +123,16 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
                             ))}
                         </Pie>
                         <Tooltip content={renderTooltip(total)} />
-                        <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: '10px' }} />
+                        <Legend
+                            formatter={(value, entry: any) => {
+                                const percent = total > 0 ? ((entry.payload?.value || 0) / total * 100).toFixed(1) : '0.0';
+                                return `${value} (${percent}%)`;
+                            }}
+                            layout="horizontal"
+                            verticalAlign="bottom"
+                            align="center"
+                            wrapperStyle={{ paddingTop: '10px' }}
+                        />
                     </PieChart>
                 </ResponsiveContainer>
             </div>
