@@ -94,6 +94,15 @@ const Item = styled(motion.li)`
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+    border-radius: 6px;
+  }
 `;
 
 const ItemInfo = styled.div`

@@ -64,12 +64,6 @@ code {
   gap: 16px;
 }
 
-.app-header h1 {
-  margin: 0;
-  text-align: left;
-  font-size: 2em;
-}
-
 .config-button {
   background: none;
   border: 2px solid #03DAC6;
@@ -243,10 +237,28 @@ code {
   background: var(--primary-hover);
 }
 
-.app-title {
+.app-header h1, .app-title {
   font-size: 2em;
   margin: 0;
   text-align: left;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand-white {
+  color: #ffffff;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.brand-teal {
+  font-weight: 600;
+  background: linear-gradient(135deg, #03DAC6, #01A896);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 /* Responsive Design */
@@ -264,13 +276,8 @@ code {
     width: 100%;
   }
 
-  .app-header h1 {
-    font-size: 1.5em;
-  }
-
   .app-title {
     font-size: 1.5em;
-    max-width: 12ch;
   }
 
   .burger-button {
