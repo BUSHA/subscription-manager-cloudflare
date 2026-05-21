@@ -39,6 +39,12 @@ const Controls = styled.div`
   gap: 0.5rem;
 `;
 
+const SortLabel = styled.label`
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
 const Select = styled.select`
   padding: 0.5rem;
   border: 1px solid #444;
@@ -146,6 +152,12 @@ const Button = styled.button<{ variant?: 'delete' }>`
 
   &:hover {
     opacity: 0.9;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 14px;
+    min-height: 44px;
+    font-size: 0.95rem;
   }
 `;
 
@@ -312,7 +324,7 @@ export default function SubscriptionList({
       <Header>
         <Title>Subscriptions list</Title>
         <Controls>
-          <label htmlFor="sort-select">Sort by: </label>
+          <SortLabel htmlFor="sort-select">Sort by: </SortLabel>
           <Select
             id="sort-select"
             value={sortBy}
