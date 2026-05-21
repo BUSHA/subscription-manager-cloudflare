@@ -10,6 +10,7 @@ import {
 import { Subscription } from '@/types';
 import styles from './Charts.module.css';
 import getSymbolFromCurrency from 'currency-symbol-map';
+import { convertCurrencySync, useExchangeRates } from '@/lib/currencyConverter';
 
 interface CompositionChartsProps {
     subscriptions: Subscription[];
@@ -19,6 +20,7 @@ interface CompositionChartsProps {
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, currency }) => {
+    const ratesVersion = useExchangeRates();
 
     // Normalize everything to monthly cost for fair comparison in pie chart
     const getMonthlyAmount = (sub: Subscription) => {
@@ -46,16 +48,20 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
             const monthlyCost = getMonthlyAmount(sub);
             if (monthlyCost === 0) return;
 
+            // Convert to selected currency
+            const subCurrency = sub.currency || 'USD';
+            const convertedCost = convertCurrencySync(monthlyCost, subCurrency, currency);
+
             // Categories (First tag)
             let category = 'Uncategorized';
             if (sub.tags && sub.tags.length > 0) {
                 category = sub.tags[0];
             }
-            catMap.set(category, (catMap.get(category) || 0) + monthlyCost);
+            catMap.set(category, (catMap.get(category) || 0) + convertedCost);
 
             // Payment Method
             const payment = sub.account || 'Unspecified';
-            payMap.set(payment, (payMap.get(payment) || 0) + monthlyCost);
+            payMap.set(payment, (payMap.get(payment) || 0) + convertedCost);
         });
 
         const formatData = (map: Map<string, number>) => {
@@ -68,12 +74,17 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
             categoryData: formatData(catMap),
             paymentData: formatData(payMap)
         };
-    }, [subscriptions]);
+    }, [subscriptions, currency, ratesVersion]);
 
-    const renderCustomTooltip = ({ active, payload }: any) => {
+    const categoryTotal = categoryData.reduce((sum, d) => sum + d.value, 0);
+    const paymentTotal = paymentData.reduce((sum, d) => sum + d.value, 0);
+
+    const renderTooltip = (total: number) => ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0];
             const symbol = getSymbolFromCurrency(currency) || '$';
+            const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : '0.0';
+            
             return (
                 <div className={styles.customTooltip}>
                     <p className={styles.tooltipLabel}>{data.name}</p>
@@ -81,7 +92,7 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
                         {symbol}{data.value.toFixed(2)} / mo
                     </p>
                     <p style={{ color: '#aaa', fontSize: '0.8em' }}>
-                        {((data.payload.percent || 0) * 100).toFixed(0)}%
+                        {percentage}%
                     </p>
                 </div>
             );
@@ -89,7 +100,7 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
         return null;
     };
 
-    const renderChart = (title: string, data: any[]) => (
+    const renderChart = (title: string, data: any[], total: number) => (
         <div className={styles.chartCard} style={{ flex: 1, minWidth: '300px' }}>
             <div className={styles.title}>{title}</div>
             <div className={styles.subtitle}>Monthly cost distribution</div>
@@ -110,7 +121,7 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
-                        <Tooltip content={renderCustomTooltip} />
+                        <Tooltip content={renderTooltip(total)} />
                         <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: '10px' }} />
                     </PieChart>
                 </ResponsiveContainer>
@@ -120,8 +131,8 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
 
     return (
         <div className={styles.pieChartsWrapper}>
-            {renderChart("Spend by category", categoryData)}
-            {renderChart("Spend by method", paymentData)}
+            {renderChart("Spend by category", categoryData, categoryTotal)}
+            {renderChart("Spend by method", paymentData, paymentTotal)}
         </div>
     );
 };

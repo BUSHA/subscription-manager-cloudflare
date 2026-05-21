@@ -28,6 +28,7 @@ import {
 import { Subscription } from '@/types';
 import styles from './Charts.module.css';
 import getSymbolFromCurrency from 'currency-symbol-map';
+import { convertCurrencySync, useExchangeRates } from '@/lib/currencyConverter';
 
 interface CostTrendGraphProps {
     subscriptions: Subscription[];
@@ -52,6 +53,7 @@ const CostTrendGraph: React.FC<CostTrendGraphProps> = ({
     currency,
     showCurrencySymbol
 }) => {
+    const ratesVersion = useExchangeRates();
     const data = useMemo(() => {
         const today = new Date();
         let startDate: Date;
@@ -114,8 +116,12 @@ const CostTrendGraph: React.FC<CostTrendGraphProps> = ({
 
             const intervalValue = sub.interval_value || sub.intervalValue || 1;
             const intervalUnit = sub.interval_unit || sub.intervalUnit || 'months';
+            const subCurrency = sub.currency || 'USD';
 
             if (intervalValue <= 0) return;
+
+            // Convert to selected currency
+            const convertedAmount = convertCurrencySync(amount, subCurrency, currency);
 
             let cursor = new Date(paymentDate);
             let iterations = 0;
@@ -130,7 +136,7 @@ const CostTrendGraph: React.FC<CostTrendGraphProps> = ({
                 if (isBefore(cursor, today) || cursor.getTime() === today.getTime()) {
                     const key = pointKeyFn(cursor);
                     if (trendTotals.has(key)) {
-                        trendTotals.set(key, (trendTotals.get(key) || 0) + amount);
+                        trendTotals.set(key, (trendTotals.get(key) || 0) + convertedAmount);
                     }
                 }
 
@@ -161,7 +167,7 @@ const CostTrendGraph: React.FC<CostTrendGraphProps> = ({
             };
         });
 
-    }, [subscriptions, selectedPeriod]);
+    }, [subscriptions, selectedPeriod, currency, ratesVersion]);
 
     const formatCurrency = (val: number) => {
         if (showCurrencySymbol) {

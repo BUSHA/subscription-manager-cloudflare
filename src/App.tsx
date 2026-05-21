@@ -11,6 +11,7 @@ import { Icon } from "@iconify-icon/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import type { CurrentUser, Subscription, UserConfiguration } from "@/types";
+import { preloadRates } from "@/lib/currencyConverter";
 
 function normalizeSubscriptions(payload: unknown): Subscription[] {
   const subscriptions = Array.isArray(payload)
@@ -87,6 +88,9 @@ export default function App() {
         setCurrentUser(meResponse as CurrentUser);
         setSubscriptions(normalizeSubscriptions(subsResponse));
         setUserConfig(normalizeConfiguration(configResponse));
+        
+        // Preload exchange rates in background
+        void preloadRates();
       } catch (error) {
         console.error("Error initializing app:", error);
         alert("Failed to initialize the application. Please refresh the page.");

@@ -13,6 +13,7 @@ import { format, subMonths, startOfMonth, isAfter, isBefore, subDays, subWeeks, 
 import { Subscription } from '@/types';
 import styles from './HistoryGraph.module.css';
 import getSymbolFromCurrency from 'currency-symbol-map';
+import { convertCurrencySync, useExchangeRates } from '@/lib/currencyConverter';
 
 interface HistoryGraphProps {
   subscriptions: Subscription[];
@@ -31,6 +32,7 @@ const subtractInterval = (date: Date, value: number, unit: string) => {
 };
 
 const HistoryGraph: React.FC<HistoryGraphProps> = ({ subscriptions, currency, showCurrencySymbol }) => {
+  const ratesVersion = useExchangeRates();
   const data = useMemo(() => {
     const today = new Date();
     const startDate = subMonths(startOfMonth(today), 11); // Start 11 months ago to show 12 months total
@@ -62,9 +64,13 @@ const HistoryGraph: React.FC<HistoryGraphProps> = ({ subscriptions, currency, sh
 
       const intervalValue = sub.interval_value || sub.intervalValue || 1;
       const intervalUnit = sub.interval_unit || sub.intervalUnit || 'months';
+      const subCurrency = sub.currency || 'USD';
 
       // Safety check: if interval is 0 or invalid, skip to avoid infinite loop
       if (intervalValue <= 0) return;
+
+      // Convert to selected currency
+      const convertedAmount = convertCurrencySync(amount, subCurrency, currency);
 
       // Limit iterations to prevent infinite loops in case of weird data
       let iterations = 0;
@@ -81,7 +87,7 @@ const HistoryGraph: React.FC<HistoryGraphProps> = ({ subscriptions, currency, sh
         if (isBefore(cursor, today) || cursor.getTime() === today.getTime()) {
           const monthKey = format(cursor, 'yyyy-MM');
           if (monthlyTotals.has(monthKey)) {
-            monthlyTotals.set(monthKey, (monthlyTotals.get(monthKey) || 0) + amount);
+            monthlyTotals.set(monthKey, (monthlyTotals.get(monthKey) || 0) + convertedAmount);
           }
         }
 
@@ -96,7 +102,7 @@ const HistoryGraph: React.FC<HistoryGraphProps> = ({ subscriptions, currency, sh
       amount: monthlyTotals.get(month) || 0
     }));
 
-  }, [subscriptions]);
+  }, [subscriptions, currency, ratesVersion]);
 
   const formatCurrency = (val: number) => {
     if (showCurrencySymbol) {
