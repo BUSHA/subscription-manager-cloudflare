@@ -76,7 +76,7 @@
 
 .account-total-card {
   flex: 1;
-  padding: 10px;
+  padding: 20px;
   border-radius: 10px;
   text-align: center;
   background: rgba(255, 255, 255, 0.1);
@@ -105,8 +105,8 @@
 }
 
 .account-total {
-  font-size: 0.9em;
-  /* Smaller font size */
+  font-size: 1.4em;
+  font-weight: 700;
   margin-bottom: 5px;
   display: flex;
   justify-content: space-between;
