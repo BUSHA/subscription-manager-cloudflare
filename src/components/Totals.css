@@ -141,16 +141,17 @@
 /* Responsive Styles */
 @media (max-width: 768px) {
   .totals {
-    padding: 12px;
+    padding: 0;
   }
 
   .totals-grid {
     flex-direction: column;
+    gap: 8px;
   }
 
   .total-card {
-    padding: 16px;
-    margin-bottom: 10px;
+    padding: 12px;
+    margin-bottom: 0;
   }
 
   .account-totals-grid {
