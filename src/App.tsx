@@ -73,6 +73,7 @@ export default function App() {
   const [filteredSubscriptions, setFilteredSubscriptions] = useState<Subscription[] | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "year">("month");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -290,10 +291,29 @@ export default function App() {
 
   return (
     <div className="app">
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
       <div className="app-header">
         <h1 className="app-title">Subscription Manager</h1>
-        <div className="header-actions">
-          <button className="export-button" onClick={handleExport} data-label="Export" aria-label="Export">
+        <button
+          className="burger-button"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isMobileMenuOpen}
+        >
+          <Icon icon={isMobileMenuOpen ? "mdi:close" : "mdi:menu"} />
+        </button>
+        <div className={`header-actions ${isMobileMenuOpen ? "open" : ""}`}>
+          <button
+            className="export-button"
+            onClick={() => {
+              handleExport();
+              setIsMobileMenuOpen(false);
+            }}
+            data-label="Export"
+            aria-label="Export"
+          >
             <Icon icon="mdi:download" className="export-icon" />
             <span>Export</span>
           </button>
@@ -301,12 +321,23 @@ export default function App() {
           <label className="import-button" data-label="Import" aria-label="Import">
             <Icon icon="mdi:upload" className="import-icon" />
             <span>Import</span>
-            <input type="file" accept=".json" onChange={handleImport} className="import-input" />
+            <input
+              type="file"
+              accept=".json"
+              onChange={(e) => {
+                handleImport(e);
+                setIsMobileMenuOpen(false);
+              }}
+              className="import-input"
+            />
           </label>
 
           <button
             className="config-button"
-            onClick={() => setIsConfigModalOpen(true)}
+            onClick={() => {
+              setIsConfigModalOpen(true);
+              setIsMobileMenuOpen(false);
+            }}
             data-label="Settings"
             aria-label="Settings"
           >
@@ -320,6 +351,7 @@ export default function App() {
               onClick={() => {
                 setProfileError(null);
                 setIsProfileModalOpen(true);
+                setIsMobileMenuOpen(false);
               }}
             >
               <span className="profile-avatar">{initials(currentUser.display_name)}</span>
