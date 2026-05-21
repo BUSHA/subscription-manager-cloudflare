@@ -36,12 +36,13 @@ code {
 .app {
   max-width: 1000px;
   margin: 15px auto 0;
-  padding: 0px;
+  padding: 0;
   font-family: var(--font-poppins), sans-serif;
   color: #fff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: clip;
 }
 
 .app h1,
@@ -60,6 +61,7 @@ code {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  gap: 16px;
 }
 
 .app-header h1 {
@@ -128,12 +130,14 @@ code {
 .header-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .export-button,
 .import-button {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
@@ -147,6 +151,7 @@ code {
   font-family: var(--font-poppins), sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .export-button:hover,
@@ -211,8 +216,15 @@ code {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .app {
+    margin-top: 0;
+    padding: 16px;
+  }
+
   .app-header {
-    padding: 1rem;
+    padding: 0;
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .app-header h1 {
@@ -223,12 +235,17 @@ code {
     font-size: 1.5em;
   }
 
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .profile-name {
     display: none;
   }
 
   .content-container {
-    padding: 1rem;
+    padding: 0;
   }
 
   .add-button {
@@ -246,5 +263,45 @@ code {
 
   h3 {
     font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 12px;
+  }
+
+  .app-title {
+    max-width: 8ch;
+    line-height: 0.95;
+    font-size: clamp(2.2rem, 12vw, 3rem);
+  }
+
+  .header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .export-button,
+  .import-button,
+  .config-button,
+  .profile-button {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    padding-inline: 10px;
+  }
+
+  .profile-button {
+    max-width: none;
+  }
+
+  .export-button span,
+  .import-button span,
+  .config-button span,
+  .profile-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

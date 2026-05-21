@@ -61,6 +61,7 @@
 .modalActions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 20px;
 }
@@ -98,4 +99,38 @@
 .submitButton:disabled {
   cursor: wait;
   opacity: 0.7;
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .modalContainer {
+    width: 100%;
+    max-height: none;
+    min-height: calc(100dvh - 24px);
+    padding: 20px;
+  }
+
+  .modalContainer h2 {
+    font-size: 1.9rem;
+    line-height: 1;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .spacer {
+    display: none;
+  }
+
+  .submitButton,
+  .cancelButton,
+  .logoutButton {
+    width: 100%;
+  }
 }

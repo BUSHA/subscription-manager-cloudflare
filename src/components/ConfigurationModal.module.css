@@ -191,4 +191,42 @@ input:checked + .toggleSlider {
 
 input:checked + .toggleSlider:before {
   transform: translateX(18px);
-} 
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .modalContainer {
+    max-width: none;
+    max-height: none;
+    min-height: calc(100dvh - 24px);
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .modalContainer h2 {
+    font-size: 1.9rem;
+    line-height: 1;
+  }
+
+  .formGroup select {
+    max-height: 160px;
+  }
+
+  .switchLabel {
+    align-items: flex-start;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .submitButton,
+  .cancelButton {
+    width: 100%;
+  }
+}

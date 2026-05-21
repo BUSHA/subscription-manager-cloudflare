@@ -76,17 +76,24 @@
 }
 
 @media (max-width: 480px) {
+  .calendarContainer {
+    padding: 0;
+  }
+
   .calendarGrid {
     grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
   }
 
   .calendarDayHeader {
     font-size: 0.8em;
+    padding: 6px 0;
   }
 
   .calendarDay {
     min-height: 60px;
-    padding: 5px;
+    padding: 4px;
+    border-radius: 8px;
   }
 
   .dateNumber {
