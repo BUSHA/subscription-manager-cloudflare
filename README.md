@@ -2,6 +2,8 @@
 
 A Cloudflare-native rewrite of `dh1011/subscription-manager` for small personal or family use. The app keeps subscription tracking, totals, currency settings, and basic metadata, while removing Docker, Next.js server runtime, local SQLite files, filesystem persistence, NTFY, notifications, and cron jobs.
 
+![Screenshot](Screenshot.jpeg)
+
 ## Stack
 
 - React + Vite static frontend
