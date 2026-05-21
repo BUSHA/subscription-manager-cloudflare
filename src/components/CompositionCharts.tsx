@@ -20,7 +20,7 @@ interface CompositionChartsProps {
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, currency }) => {
-    const ratesVersion = useExchangeRates();
+    const { loaded } = useExchangeRates();
 
     // Normalize everything to monthly cost for fair comparison in pie chart
     const getMonthlyAmount = (sub: Subscription) => {
@@ -51,6 +51,7 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
             // Convert to selected currency
             const subCurrency = sub.currency || 'USD';
             const convertedCost = convertCurrencySync(monthlyCost, subCurrency, currency);
+            if (convertedCost === null) return;
 
             // Categories (First tag)
             let category = 'Uncategorized';
@@ -74,7 +75,7 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
             categoryData: formatData(catMap),
             paymentData: formatData(payMap)
         };
-    }, [subscriptions, currency, ratesVersion]);
+    }, [subscriptions, currency, loaded]);
 
     const categoryTotal = categoryData.reduce((sum, d) => sum + d.value, 0);
     const paymentTotal = paymentData.reduce((sum, d) => sum + d.value, 0);
@@ -128,6 +129,10 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
             </div>
         </div>
     );
+
+    if (!loaded) {
+        return null;
+    }
 
     return (
         <div className={styles.pieChartsWrapper}>

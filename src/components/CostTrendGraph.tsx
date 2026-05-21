@@ -53,7 +53,7 @@ const CostTrendGraph: React.FC<CostTrendGraphProps> = ({
     currency,
     showCurrencySymbol
 }) => {
-    const ratesVersion = useExchangeRates();
+    const { loaded } = useExchangeRates();
     const data = useMemo(() => {
         const today = new Date();
         let startDate: Date;
@@ -122,6 +122,7 @@ const CostTrendGraph: React.FC<CostTrendGraphProps> = ({
 
             // Convert to selected currency
             const convertedAmount = convertCurrencySync(amount, subCurrency, currency);
+            if (convertedAmount === null) return;
 
             let cursor = new Date(paymentDate);
             let iterations = 0;
@@ -167,7 +168,11 @@ const CostTrendGraph: React.FC<CostTrendGraphProps> = ({
             };
         });
 
-    }, [subscriptions, selectedPeriod, currency, ratesVersion]);
+    }, [subscriptions, selectedPeriod, currency, loaded]);
+
+    if (!loaded) {
+        return null;
+    }
 
     const formatCurrency = (val: number) => {
         if (showCurrencySymbol) {

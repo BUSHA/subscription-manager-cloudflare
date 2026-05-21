@@ -32,7 +32,7 @@ const subtractInterval = (date: Date, value: number, unit: string) => {
 };
 
 const HistoryGraph: React.FC<HistoryGraphProps> = ({ subscriptions, currency, showCurrencySymbol }) => {
-  const ratesVersion = useExchangeRates();
+  const { loaded } = useExchangeRates();
   const data = useMemo(() => {
     const today = new Date();
     const startDate = subMonths(startOfMonth(today), 11); // Start 11 months ago to show 12 months total
@@ -71,6 +71,7 @@ const HistoryGraph: React.FC<HistoryGraphProps> = ({ subscriptions, currency, sh
 
       // Convert to selected currency
       const convertedAmount = convertCurrencySync(amount, subCurrency, currency);
+      if (convertedAmount === null) return;
 
       // Limit iterations to prevent infinite loops in case of weird data
       let iterations = 0;
@@ -102,7 +103,11 @@ const HistoryGraph: React.FC<HistoryGraphProps> = ({ subscriptions, currency, sh
       amount: monthlyTotals.get(month) || 0
     }));
 
-  }, [subscriptions, currency, ratesVersion]);
+  }, [subscriptions, currency, loaded]);
+
+  if (!loaded) {
+    return null;
+  }
 
   const formatCurrency = (val: number) => {
     if (showCurrencySymbol) {
