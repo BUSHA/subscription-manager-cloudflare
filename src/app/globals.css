@@ -87,6 +87,44 @@ code {
   color: #080808;
 }
 
+.profile-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  max-width: 220px;
+  padding: 3px 10px 3px 4px;
+  border: 2px solid #03DAC6;
+  border-radius: 5px;
+  background: transparent;
+  color: #03DAC6;
+  font: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-button:hover {
+  background: #03DAC6;
+  color: #080808;
+}
+
+.profile-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: rgba(3, 218, 198, 0.18);
+  color: inherit;
+  font-weight: 800;
+}
+
+.profile-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -183,6 +221,10 @@ code {
 
   .app-title {
     font-size: 1.5em;
+  }
+
+  .profile-name {
+    display: none;
   }
 
   .content-container {

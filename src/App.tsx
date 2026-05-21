@@ -6,10 +6,11 @@ import Totals from "@/components/Totals";
 import ConfigurationModal from "@/components/ConfigurationModal";
 import CostTrendGraph from "@/components/CostTrendGraph";
 import CompositionCharts from "@/components/CompositionCharts";
+import { ProfileModal } from "@/components/ProfileModal";
 import { Icon } from "@iconify-icon/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
-import type { Subscription, UserConfiguration } from "@/types";
+import type { CurrentUser, Subscription, UserConfiguration } from "@/types";
 
 function normalizeSubscriptions(payload: unknown): Subscription[] {
   const subscriptions = Array.isArray(payload)
@@ -45,17 +46,30 @@ function normalizeConfiguration(payload: unknown): UserConfiguration {
   };
 }
 
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export default function App() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [userConfig, setUserConfig] = useState<UserConfiguration>({
     currency: "USD",
     showCurrencySymbol: true
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | undefined>();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfileSaving, setIsProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [filteredSubscriptions, setFilteredSubscriptions] = useState<Subscription[] | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "year">("month");
@@ -63,11 +77,13 @@ export default function App() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        const [subsResponse, configResponse] = await Promise.all([
+        const [meResponse, subsResponse, configResponse] = await Promise.all([
+          fetch("/api/me").then((res) => res.json()),
           fetch("/api/subscriptions").then((res) => res.json()),
           fetch("/api/user-configuration").then((res) => res.json())
         ]);
 
+        setCurrentUser(meResponse as CurrentUser);
         setSubscriptions(normalizeSubscriptions(subsResponse));
         setUserConfig(normalizeConfiguration(configResponse));
       } catch (error) {
@@ -233,6 +249,35 @@ export default function App() {
     }
   };
 
+  const handleProfileSave = async (displayName: string) => {
+    if (!displayName) {
+      setProfileError("Name is required.");
+      return;
+    }
+
+    setIsProfileSaving(true);
+    setProfileError(null);
+    try {
+      const response = await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ display_name: displayName })
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as CurrentUser | { error?: string };
+      if (!response.ok) {
+        throw new Error("error" in payload && payload.error ? payload.error : "Could not save profile");
+      }
+
+      setCurrentUser(payload as CurrentUser);
+      setIsProfileModalOpen(false);
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : "Could not save profile");
+    } finally {
+      setIsProfileSaving(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="app">
@@ -268,6 +313,19 @@ export default function App() {
             <FontAwesomeIcon icon={faCog} />
             Settings
           </button>
+          {currentUser ? (
+            <button
+              className="profile-button"
+              type="button"
+              onClick={() => {
+                setProfileError(null);
+                setIsProfileModalOpen(true);
+              }}
+            >
+              <span className="profile-avatar">{initials(currentUser.display_name)}</span>
+              <span className="profile-name">{currentUser.display_name}</span>
+            </button>
+          ) : null}
         </div>
       </div>
       <div className="content-container">
@@ -320,6 +378,16 @@ export default function App() {
           currency={userConfig.currency}
           showCurrencySymbol={userConfig.showCurrencySymbol}
           onSave={handleConfigurationSave}
+        />
+      ) : null}
+
+      {isProfileModalOpen && currentUser ? (
+        <ProfileModal
+          user={currentUser}
+          saving={isProfileSaving}
+          error={profileError}
+          onClose={() => setIsProfileModalOpen(false)}
+          onSave={(displayName) => void handleProfileSave(displayName)}
         />
       ) : null}
     </div>

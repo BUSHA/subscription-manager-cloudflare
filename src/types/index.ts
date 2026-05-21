@@ -5,6 +5,12 @@ export interface UserConfiguration {
   locale?: string | null;
 }
 
+export interface CurrentUser {
+  id: string;
+  email: string;
+  display_name: string;
+}
+
 export interface Subscription {
   id?: number;
   user_id?: string;

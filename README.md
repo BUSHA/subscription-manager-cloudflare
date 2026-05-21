@@ -8,7 +8,7 @@ A Cloudflare-native rewrite of `dh1011/subscription-manager` for small personal 
 - Cloudflare Worker API under `/api`
 - Cloudflare D1 database
 - Cloudflare Access-compatible identity from `Cf-Access-Authenticated-User-Email`
-- Local development fallback user from `DEV_USER_EMAIL` or `dev@example.com`
+- Local development fallback user from `DEV_AUTH_EMAIL` or `dev@example.com`
 
 ## Local Setup
 
@@ -66,11 +66,15 @@ For a real deployment, protect the deployed app with Cloudflare Access:
 4. Use the deployed app domain.
 5. Add a policy that allows only the emails or identity providers you trust.
 
-The Worker reads `Cf-Access-Authenticated-User-Email` and uses that email as `user_id`. Every subscription and setting query is scoped to that user. In local development, the Worker falls back to `DEV_USER_EMAIL` from `wrangler.jsonc`, then `dev@example.com`.
+The Worker reads `Cf-Access-Authenticated-User-Email`. On first request, it creates a local user profile with a default display name derived from the email address. Every subscription and setting query is scoped to that user. In local development, the Worker falls back to `DEV_AUTH_EMAIL` from `wrangler.jsonc`, then `dev@example.com`.
+
+The profile button in the header lets the signed-in user update their display name or log out through `/cdn-cgi/access/logout`.
 
 ## API
 
 - `GET /api/health`
+- `GET /api/me`
+- `PATCH /api/me`
 - `GET /api/subscriptions`
 - `POST /api/subscriptions`
 - `GET /api/subscriptions/:id`
@@ -95,11 +99,10 @@ A basic starting point is:
 sqlite3 old-subscriptions.db .dump > dump.sql
 ```
 
-Review and adjust the dump before importing it into D1. The new schema adds `user_id` and removes notification-related tables and fields.
+Review and adjust the dump before importing it into D1. The new schema adds per-user ownership through Cloudflare Access identity and removes notification-related tables and fields.
 
 ## Current Limitations
 
 - Notifications, NTFY, email reminders, and scheduled jobs are intentionally removed.
-- There is no import wizard.
 - Currency conversion is not implemented; totals assume each subscription amount is already in the displayed currency.
 - This is intended for a few trusted users behind Cloudflare Access, not a public multi-tenant SaaS product.

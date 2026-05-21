@@ -1,9 +1,10 @@
-import { getUserId } from "../auth";
+import { getCurrentUser } from "../auth";
 import { mapConfiguration } from "../db";
 import { error, json, type Env } from "../index";
 
 export async function handleUserConfiguration(request: Request, env: Env) {
-  const userId = getUserId(request, env);
+  const user = await getCurrentUser(request, env);
+  const userId = user.id;
 
   if (request.method === "GET") {
     const configuration = await getOrCreateConfiguration(env, userId);

@@ -1,10 +1,15 @@
 import type { IntervalUnit, SubscriptionInput } from "../../lib/types";
-import { getUserId } from "../auth";
+import { getCurrentUser } from "../auth";
 import { error, json, type Env } from "../index";
 import { mapSubscription, normalizeTags } from "../db";
 
 const validCycles = new Set(["weekly", "monthly", "quarterly", "yearly", "one-time"]);
 const validIntervalUnits = new Set(["days", "weeks", "months", "years"]);
+const subscriptionColumns = `
+  id, user_id, name, description, amount, currency, billing_cycle, billing_date, due_date,
+  category, payment_method, account, url, notes, icon, color, tags,
+  autopay, interval_value, interval_unit, included, is_active, created_at, updated_at
+`;
 const optionalStringFields = [
   "description",
   "billing_date",
@@ -43,7 +48,8 @@ type ValidatedSubscription = Required<Pick<SubscriptionInput, "name" | "amount" 
   };
 
 export async function handleSubscriptions(request: Request, env: Env, segments: string[]) {
-  const userId = getUserId(request, env);
+  const user = await getCurrentUser(request, env);
+  const userId = user.id;
   const id = segments[0] ? Number.parseInt(segments[0], 10) : null;
 
   if (segments.length > 1 || (segments[0] && (id === null || !Number.isInteger(id) || id <= 0))) {
@@ -61,7 +67,7 @@ export async function handleSubscriptions(request: Request, env: Env, segments: 
 
 async function listSubscriptions(env: Env, userId: string) {
   const result = await env.DB.prepare(
-    "SELECT * FROM subscriptions WHERE user_id = ? ORDER BY is_active DESC, billing_date IS NULL, billing_date ASC, name ASC"
+    `SELECT ${subscriptionColumns} FROM subscriptions WHERE user_id = ? ORDER BY is_active DESC, billing_date IS NULL, billing_date ASC, name ASC`
   )
     .bind(userId)
     .all();
@@ -70,7 +76,9 @@ async function listSubscriptions(env: Env, userId: string) {
 }
 
 async function getSubscription(env: Env, userId: string, id: number) {
-  const row = await env.DB.prepare("SELECT * FROM subscriptions WHERE id = ? AND user_id = ?").bind(id, userId).first();
+  const row = await env.DB.prepare(`SELECT ${subscriptionColumns} FROM subscriptions WHERE id = ? AND user_id = ?`)
+    .bind(id, userId)
+    .first();
   if (!row) return error("Subscription not found", 404);
   return json({ subscription: mapSubscription(row as never) });
 }
@@ -112,7 +120,7 @@ async function createSubscription(request: Request, env: Env, userId: string) {
     )
     .run();
 
-  const row = await env.DB.prepare("SELECT * FROM subscriptions WHERE id = ? AND user_id = ?")
+  const row = await env.DB.prepare(`SELECT ${subscriptionColumns} FROM subscriptions WHERE id = ? AND user_id = ?`)
     .bind(result.meta.last_row_id, userId)
     .first();
 
@@ -163,7 +171,9 @@ async function updateSubscription(request: Request, env: Env, userId: string, id
     )
     .run();
 
-  const row = await env.DB.prepare("SELECT * FROM subscriptions WHERE id = ? AND user_id = ?").bind(id, userId).first();
+  const row = await env.DB.prepare(`SELECT ${subscriptionColumns} FROM subscriptions WHERE id = ? AND user_id = ?`)
+    .bind(id, userId)
+    .first();
   return json({ subscription: mapSubscription(row as never) });
 }
 
