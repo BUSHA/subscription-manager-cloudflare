@@ -8,7 +8,7 @@ import getSymbolFromCurrency from 'currency-symbol-map';
 import { parseISO, addDays, addWeeks, addMonths, addYears, format } from 'date-fns';
 import { Subscription } from '@/types';
 import { convertCurrencySync } from '@/lib/currencyConverter';
-import { getTagColor } from '@/lib/utils';
+import { getTagColor, pluralize } from '@/lib/utils';
 
 const Container = styled.div`
   background: transparent;
@@ -435,7 +435,7 @@ export default function SubscriptionList({
                       maxWidth: '200px'
                     }}>{sub.name}</p>
                     <p style={{ fontSize: '0.8em', margin: 0, color: '#adadad' }}>
-                      {formatCurrency(sub.amount, sub.currency)}/{sub.intervalValue} {sub.intervalUnit}
+                      {formatCurrency(sub.amount, sub.currency)}/{pluralize(sub.intervalValue, sub.intervalUnit)}
                     </p>
                   </div>
                 </ItemInfo>

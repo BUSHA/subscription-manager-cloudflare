@@ -89,4 +89,20 @@ export function getTagColor(tag: string): { bg: string; text: string } {
     hash |= 0;
   }
   return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+}
+
+const singularUnits: Record<string, string> = {
+  'days': 'day',
+  'weeks': 'week',
+  'months': 'month',
+  'years': 'year',
+};
+
+export function pluralize(value: number | string, unit: string): string {
+  const num = typeof value === 'string' ? parseInt(value) : value;
+  const singular = singularUnits[unit.toLowerCase()] || unit.replace(/s$/, '');
+  if (num === 1) {
+    return `1 ${singular}`;
+  }
+  return `${num} ${unit}`;
 } 
