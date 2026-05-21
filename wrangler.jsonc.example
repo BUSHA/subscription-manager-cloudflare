@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "subscription-manager-cf",
+  "name": "YOUR_APP_NAME",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-05-21",
   "assets": {
@@ -14,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "subscription-manager",
-      "database_id": "72562a65-0ac6-41bc-a8b8-897fae9239e6"
+      "database_id": "YOUR_DATABASE_ID"
     }
   ]
 }
