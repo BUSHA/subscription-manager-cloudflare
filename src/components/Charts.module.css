@@ -13,6 +13,12 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: auto;
     margin: 0 20px 2rem 20px;
+    outline: none;
+}
+
+.chartCard svg,
+.chartCard svg * {
+    outline: none;
 }
 
 @media (max-width: 768px) {

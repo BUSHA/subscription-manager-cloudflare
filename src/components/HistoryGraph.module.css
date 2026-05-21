@@ -5,6 +5,12 @@
   margin-top: 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   color: #fff;
+  outline: none;
+}
+
+.graphContainer svg,
+.graphContainer svg * {
+  outline: none;
 }
 
 @media (max-width: 768px) {
