@@ -26,7 +26,11 @@ export async function handleUserConfiguration(request: Request, env: Env) {
     const currency = typeof input.currency === "string" && input.currency.trim() ? input.currency.trim().toUpperCase() : "USD";
     const locale = typeof input.locale === "string" && input.locale.trim() ? input.locale.trim() : null;
     const showCurrencySymbol =
-      typeof input.show_currency_symbol === "boolean" ? input.show_currency_symbol : true;
+      typeof input.show_currency_symbol === "boolean"
+        ? input.show_currency_symbol
+        : typeof input.showCurrencySymbol === "boolean"
+          ? input.showCurrencySymbol
+          : true;
 
     await env.DB.prepare(
       `INSERT INTO user_configuration (user_id, currency, locale, show_currency_symbol)

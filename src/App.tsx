@@ -1,172 +1,325 @@
-import { useEffect, useMemo, useState } from "react";
-import { Plus, RefreshCw, Settings } from "lucide-react";
-import { api } from "./lib/api";
-import { formatCurrency, toMonthlyAmount, toYearlyAmount } from "./lib/format";
-import type { Subscription, SubscriptionInput, UserConfiguration } from "./lib/types";
-import { SubscriptionForm } from "./components/SubscriptionForm";
-import { SubscriptionList } from "./components/SubscriptionList";
-import { SettingsPanel } from "./components/SettingsPanel";
-import { SummaryCards } from "./components/SummaryCards";
+import { useCallback, useEffect, useState } from "react";
+import SubscriptionList from "@/components/SubscriptionList";
+import SubscriptionModal from "@/components/SubscriptionModal";
+import CalendarGrid from "@/components/CalendarGrid";
+import Totals from "@/components/Totals";
+import ConfigurationModal from "@/components/ConfigurationModal";
+import CostTrendGraph from "@/components/CostTrendGraph";
+import CompositionCharts from "@/components/CompositionCharts";
+import { Icon } from "@iconify-icon/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCog } from "@fortawesome/free-solid-svg-icons";
+import type { Subscription, UserConfiguration } from "@/types";
 
-const defaultConfiguration: UserConfiguration = {
-  currency: "USD",
-  locale: "en-US",
-  show_currency_symbol: true
-};
+function normalizeSubscriptions(payload: unknown): Subscription[] {
+  const subscriptions = Array.isArray(payload)
+    ? payload
+    : payload && typeof payload === "object" && "subscriptions" in payload && Array.isArray((payload as { subscriptions: unknown }).subscriptions)
+      ? (payload as { subscriptions: Subscription[] }).subscriptions
+      : [];
+
+  return subscriptions.map((sub) => ({
+    ...sub,
+    dueDate: sub.dueDate || sub.due_date || sub.billing_date || new Date().toISOString().split("T")[0],
+    due_date: sub.due_date || sub.dueDate || sub.billing_date,
+    account: sub.account || sub.payment_method || "",
+    autopay: Boolean(sub.autopay),
+    intervalValue: Number(sub.intervalValue || sub.interval_value || 1),
+    intervalUnit: sub.intervalUnit || sub.interval_unit || "months",
+    interval_value: Number(sub.interval_value || sub.intervalValue || 1),
+    interval_unit: (sub.interval_unit || sub.intervalUnit || "months") as Subscription["interval_unit"],
+    included: sub.included !== undefined ? sub.included : sub.is_active !== false,
+    tags: Array.isArray(sub.tags) ? sub.tags : []
+  }));
+}
+
+function normalizeConfiguration(payload: unknown): UserConfiguration {
+  const config =
+    payload && typeof payload === "object" && "configuration" in payload
+      ? (payload as { configuration: UserConfiguration }).configuration
+      : (payload as UserConfiguration | null);
+
+  return {
+    currency: config?.currency || "USD",
+    showCurrencySymbol: config?.showCurrencySymbol ?? config?.show_currency_symbol ?? true
+  };
+}
 
 export default function App() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [configuration, setConfiguration] = useState<UserConfiguration>(defaultConfiguration);
-  const [editing, setEditing] = useState<Subscription | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function loadData() {
-    setError(null);
-    setLoading(true);
-    try {
-      const [subs, configResponse] = await Promise.all([api.listSubscriptions(), api.getUserConfiguration()]);
-      setSubscriptions(subs);
-      setConfiguration(configResponse.configuration);
-    } catch (exception) {
-      setError(exception instanceof Error ? exception.message : "Failed to load data");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [userConfig, setUserConfig] = useState<UserConfiguration>({
+    currency: "USD",
+    showCurrencySymbol: true
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
+  const [filteredSubscriptions, setFilteredSubscriptions] = useState<Subscription[] | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "year">("month");
 
   useEffect(() => {
-    void loadData();
+    const initializeApp = async () => {
+      try {
+        const [subsResponse, configResponse] = await Promise.all([
+          fetch("/api/subscriptions").then((res) => res.json()),
+          fetch("/api/user-configuration").then((res) => res.json())
+        ]);
+
+        setSubscriptions(normalizeSubscriptions(subsResponse));
+        setUserConfig(normalizeConfiguration(configResponse));
+      } catch (error) {
+        console.error("Error initializing app:", error);
+        alert("Failed to initialize the application. Please refresh the page.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void initializeApp();
   }, []);
 
-  const totals = useMemo(() => {
-    return subscriptions.reduce(
-      (acc, subscription) => {
-        acc.monthly += toMonthlyAmount(subscription);
-        acc.yearly += toYearlyAmount(subscription);
-        if (subscription.is_active) acc.active += 1;
-        return acc;
-      },
-      { monthly: 0, yearly: 0, active: 0 }
-    );
-  }, [subscriptions]);
-
-  async function saveSubscription(input: SubscriptionInput) {
-    setSaving(true);
-    setError(null);
+  const handleSaveSubscription = async (subscription: Subscription) => {
     try {
-      const result = editing
-        ? await api.updateSubscription(editing.id, input)
-        : await api.createSubscription(input);
+      const method = subscription.id ? "PUT" : "POST";
+      const url = subscription.id ? `/api/subscriptions/${subscription.id}` : "/api/subscriptions";
+      const subToSave = {
+        ...subscription,
+        currency: subscription.currency === "default" ? userConfig.currency : subscription.currency,
+        included: subscription.included !== undefined ? subscription.included : true
+      };
 
-      setSubscriptions((current) => {
-        if (editing) {
-          return current.map((subscription) => (subscription.id === editing.id ? result.subscription : subscription));
-        }
-        return [result.subscription, ...current];
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subToSave)
       });
-      setEditing(null);
-      setIsAdding(false);
-    } catch (exception) {
-      setError(exception instanceof Error ? exception.message : "Failed to save subscription");
-    } finally {
-      setSaving(false);
+
+      if (!response.ok) {
+        throw new Error("Failed to save subscription");
+      }
+
+      const savedPayload = (await response.json()) as { subscription?: Subscription } | Subscription;
+      const [savedSubscription] = normalizeSubscriptions(
+        "subscription" in savedPayload ? [savedPayload.subscription] : [savedPayload]
+      );
+
+      setSubscriptions((prev) =>
+        subscription.id
+          ? prev.map((sub) => (sub.id === subscription.id ? savedSubscription : sub))
+          : [...prev, savedSubscription]
+      );
+    } catch (error) {
+      console.error("Error saving subscription:", error);
+      alert("Failed to save subscription. Please try again.");
     }
-  }
+  };
 
-  async function deleteSubscription(subscription: Subscription) {
-    const confirmed = window.confirm(`Delete ${subscription.name}?`);
-    if (!confirmed) return;
+  const handleDeleteSubscription = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this subscription?")) return;
 
-    setError(null);
     try {
-      await api.deleteSubscription(subscription.id);
-      setSubscriptions((current) => current.filter((item) => item.id !== subscription.id));
-    } catch (exception) {
-      setError(exception instanceof Error ? exception.message : "Failed to delete subscription");
+      const response = await fetch(`/api/subscriptions/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to delete subscription");
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
+    } catch (error) {
+      console.error("Error deleting subscription:", error);
+      alert("Failed to delete subscription. Please try again.");
     }
-  }
+  };
 
-  async function saveConfiguration(next: UserConfiguration) {
-    setSaving(true);
-    setError(null);
+  const handleToggleInclude = async (id: number) => {
+    const current = subscriptions.find((sub) => sub.id === id);
+    if (!current) return;
+
+    const next = { ...current, included: !current.included };
+    setSubscriptions((prev) => prev.map((sub) => (sub.id === id ? next : sub)));
+
     try {
-      const result = await api.updateUserConfiguration(next);
-      setConfiguration(result.configuration);
-      setShowSettings(false);
-    } catch (exception) {
-      setError(exception instanceof Error ? exception.message : "Failed to save settings");
-    } finally {
-      setSaving(false);
+      const response = await fetch(`/api/subscriptions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(next)
+      });
+      if (!response.ok) throw new Error("Failed to update subscription");
+    } catch (error) {
+      console.error("Error updating subscription:", error);
+      setSubscriptions((prev) => prev.map((sub) => (sub.id === id ? current : sub)));
+      alert("Failed to update subscription. Please try again.");
     }
-  }
+  };
 
-  const displayCurrency = configuration.currency || "USD";
-  const displayLocale = configuration.locale || "en-US";
+  const handleFilteredSubscriptionsChange = useCallback((nextFilteredSubscriptions: Subscription[]) => {
+    setFilteredSubscriptions(nextFilteredSubscriptions);
+  }, []);
+
+  const handleTagFilterChange = useCallback((tags: string[]) => {
+    setSelectedTags(tags);
+  }, []);
+
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date);
+    setSelectedSubscription(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleExport = () => {
+    const data = JSON.stringify(subscriptions, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "subscriptions.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const importedSubscriptions = normalizeSubscriptions(JSON.parse(e.target?.result as string));
+        const savedSubscriptions = await Promise.all(
+          importedSubscriptions.map(async (sub) => {
+            const response = await fetch("/api/subscriptions", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...sub, currency: sub.currency || userConfig.currency })
+            });
+            if (!response.ok) throw new Error(`Failed to save subscription: ${sub.name}`);
+            const payload = (await response.json()) as { subscription: Subscription };
+            return normalizeSubscriptions([payload.subscription])[0];
+          })
+        );
+
+        setSubscriptions(savedSubscriptions);
+        alert(`Successfully imported ${savedSubscriptions.length} subscriptions.`);
+      } catch (error) {
+        console.error("Error importing subscriptions:", error);
+        alert("Failed to import subscriptions. Please check the file format.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleConfigurationSave = async (config: {
+    currency: string;
+    showCurrencySymbol: boolean;
+  }) => {
+    try {
+      const response = await fetch("/api/user-configuration", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currency: config.currency,
+          show_currency_symbol: config.showCurrencySymbol
+        })
+      });
+
+      if (!response.ok) throw new Error("Failed to save configuration");
+      const payload = await response.json();
+      setUserConfig(normalizeConfiguration(payload));
+      setIsConfigModalOpen(false);
+    } catch (error) {
+      console.error("Error saving configuration:", error);
+      alert("Failed to save configuration. Please try again.");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="app">
+        <div className="content-container">
+          <div style={{ textAlign: "center", marginTop: "2rem", color: "#fff" }}>Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Family subscriptions</p>
-          <h1>Subscription Manager</h1>
+    <div className="app">
+      <div className="app-header">
+        <h1 className="app-title">Subscription Manager</h1>
+        <div className="header-actions">
+          <button className="export-button" onClick={handleExport} data-label="Export" aria-label="Export">
+            <Icon icon="mdi:download" className="export-icon" />
+            <span>Export</span>
+          </button>
+
+          <label className="import-button" data-label="Import" aria-label="Import">
+            <Icon icon="mdi:upload" className="import-icon" />
+            <span>Import</span>
+            <input type="file" accept=".json" onChange={handleImport} className="import-input" />
+          </label>
+
+          <button
+            className="config-button"
+            onClick={() => setIsConfigModalOpen(true)}
+            data-label="Settings"
+            aria-label="Settings"
+          >
+            <FontAwesomeIcon icon={faCog} />
+            Settings
+          </button>
         </div>
-        <div className="topbar-actions">
-          <button className="icon-button" type="button" onClick={() => void loadData()} aria-label="Refresh">
-            <RefreshCw size={18} />
-          </button>
-          <button className="icon-button" type="button" onClick={() => setShowSettings(true)} aria-label="Settings">
-            <Settings size={18} />
-          </button>
-          <button className="primary-button" type="button" onClick={() => setIsAdding(true)}>
-            <Plus size={18} />
-            Add
-          </button>
-        </div>
-      </header>
-
-      {error ? <div className="alert">{error}</div> : null}
-
-      <main>
-        <SummaryCards
-          activeCount={totals.active}
-          monthlyTotal={formatCurrency(totals.monthly, displayCurrency, displayLocale, configuration.show_currency_symbol)}
-          yearlyTotal={formatCurrency(totals.yearly, displayCurrency, displayLocale, configuration.show_currency_symbol)}
-        />
-
+      </div>
+      <div className="content-container">
+        <CalendarGrid subscriptions={subscriptions} onDateClick={handleDateClick} currentDate={selectedDate} />
         <SubscriptionList
           subscriptions={subscriptions}
-          loading={loading}
-          currency={displayCurrency}
-          locale={displayLocale}
-          showCurrencySymbol={configuration.show_currency_symbol}
-          onEdit={setEditing}
-          onDelete={(subscription) => void deleteSubscription(subscription)}
-        />
-      </main>
-
-      {isAdding || editing ? (
-        <SubscriptionForm
-          subscription={editing}
-          defaultCurrency={displayCurrency}
-          saving={saving}
-          onCancel={() => {
-            setEditing(null);
-            setIsAdding(false);
+          onEdit={(subscription) => {
+            setSelectedSubscription(subscription);
+            setIsModalOpen(true);
           }}
-          onSave={(input) => void saveSubscription(input)}
+          onDelete={handleDeleteSubscription}
+          onToggleInclude={handleToggleInclude}
+          showCurrencySymbol={userConfig.showCurrencySymbol}
+          onFilteredSubscriptionsChange={handleFilteredSubscriptionsChange}
+          onTagFilterChange={handleTagFilterChange}
+        />
+        <Totals
+          subscriptions={filteredSubscriptions || subscriptions}
+          currency={userConfig.currency}
+          showCurrencySymbol={userConfig.showCurrencySymbol}
+          selectedTags={selectedTags}
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={setSelectedPeriod}
+        />
+        <CostTrendGraph
+          subscriptions={filteredSubscriptions || subscriptions}
+          selectedPeriod={selectedPeriod}
+          currency={userConfig.currency}
+          showCurrencySymbol={userConfig.showCurrencySymbol}
+        />
+        <CompositionCharts subscriptions={filteredSubscriptions || subscriptions} currency={userConfig.currency} />
+      </div>
+      {isModalOpen ? (
+        <SubscriptionModal
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedSubscription(undefined);
+          }}
+          onSave={handleSaveSubscription}
+          selectedSubscription={selectedSubscription}
+          selectedDate={selectedDate}
+          defaultCurrency={userConfig.currency}
         />
       ) : null}
 
-      {showSettings ? (
-        <SettingsPanel
-          configuration={configuration}
-          saving={saving}
-          onCancel={() => setShowSettings(false)}
-          onSave={(next) => void saveConfiguration(next)}
+      {isConfigModalOpen ? (
+        <ConfigurationModal
+          isOpen={isConfigModalOpen}
+          onClose={() => setIsConfigModalOpen(false)}
+          currency={userConfig.currency}
+          showCurrencySymbol={userConfig.showCurrencySymbol}
+          onSave={handleConfigurationSave}
         />
       ) : null}
     </div>
