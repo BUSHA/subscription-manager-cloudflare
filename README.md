@@ -18,6 +18,14 @@ Install dependencies:
 npm install
 ```
 
+Copy the example configuration and fill in your values:
+
+```bash
+cp wrangler.jsonc.example wrangler.jsonc
+```
+
+Edit `wrangler.jsonc` with your D1 database ID (see below) and app name.
+
 Create a D1 database:
 
 ```bash
@@ -101,8 +109,17 @@ sqlite3 old-subscriptions.db .dump > dump.sql
 
 Review and adjust the dump before importing it into D1. The new schema adds per-user ownership through Cloudflare Access identity and removes notification-related tables and fields.
 
+## Currency Conversion
+
+The app supports multi-currency subscriptions. Each subscription stores its own currency code, and all charts display amounts converted to your selected currency using live exchange rates from the [ExchangeRate-API](https://open.er-api.com).
+
+- Exchange rates are fetched on app startup and cached for up to 1 hour.
+- If the API is unavailable, conversion is disabled and charts will not render to avoid showing incorrect data.
+- The cost trend line chart, spending history bar chart, and composition pie charts all convert subscription amounts to your configured currency.
+- The sort-by-amount option in the subscription list also converts currencies before comparing, so values in different currencies are sorted correctly.
+- Summary totals display per-currency amounts (no conversion) so you can see the original values.
+
 ## Current Limitations
 
 - Notifications, NTFY, email reminders, and scheduled jobs are intentionally removed.
-- Currency conversion is not implemented; totals assume each subscription amount is already in the displayed currency.
 - This is intended for a few trusted users behind Cloudflare Access, not a public multi-tenant SaaS product.
