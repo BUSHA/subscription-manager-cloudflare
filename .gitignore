@@ -8,9 +8,12 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
+.dev.vars
+.wrangler
 .env.local
 .env.development.local
 .env.test.local
@@ -26,13 +29,15 @@ yarn-error.log*
 .env
 
 subscriptions.db
+*.db
+*.sqlite
+*.sqlite3
 
 temp
 
 /env
 
 build
-package-lock.json
 __pycache__
 
 docker-compose_dev.yml

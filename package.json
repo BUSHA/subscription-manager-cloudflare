@@ -1,38 +1,31 @@
 {
-  "name": "subscription-manager",
-  "version": "2.0.0",
+  "name": "subscription-manager-cf",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next dev",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test:api": "node scripts/test-api.js"
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create subscription-manager",
+    "db:migrate:local": "wrangler d1 migrations apply subscription-manager --local",
+    "db:migrate:remote": "wrangler d1 migrations apply subscription-manager --remote",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.6.0",
-    "@fortawesome/free-solid-svg-icons": "^6.6.0",
-    "@fortawesome/react-fontawesome": "^0.2.2",
-    "@iconify-icon/react": "^2.3.0",
-    "axios": "^1.7.7",
-    "currency-symbol-map": "^5.1.0",
-    "date-fns": "^4.1.0",
-    "framer-motion": "^11.5.6",
-    "next": "14.1.0",
-    "react": "^18.3.1",
-    "react-datepicker": "^7.5.0",
-    "react-dom": "^18.3.1",
-    "recharts": "^3.6.0",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
-    "styled-components": "^6.1.13"
+    "@vitejs/plugin-react": "^5.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "14.1.0",
-    "typescript": "^5.3.0"
+    "@cloudflare/workers-types": "^4.20260521.0",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "wrangler": "^4.0.0"
   }
 }

@@ -1,105 +1,105 @@
-# 📅 Subscription Manager
+# Subscription Manager CF
 
-[![Docker](https://img.shields.io/docker/pulls/dh1011/subscription-manager.svg)](https://hub.docker.com/r/dh1011/subscription-manager)
+A Cloudflare-native rewrite of `dh1011/subscription-manager` for small personal or family use. The app keeps subscription tracking, totals, currency settings, and basic metadata, while removing Docker, Next.js server runtime, local SQLite files, filesystem persistence, NTFY, notifications, and cron jobs.
 
-This single-page web application lets you keep track of and manage your subscriptions. You can add, edit, delete, and view subscriptions all in one place. You can set up notifications for each subscription using NTFY. The app provides a general summary of all your subscriptions and a detailed summary for each payment account, all within a single, intuitive interface.
+## Stack
 
-## Demo
-https://github.com/user-attachments/assets/9e7830e1-3c3c-474a-8f48-93ee8f5e440d
+- React + Vite static frontend
+- Cloudflare Worker API under `/api`
+- Cloudflare D1 database
+- Cloudflare Access-compatible identity from `Cf-Access-Authenticated-User-Email`
+- Local development fallback user from `DEV_USER_EMAIL` or `dev@example.com`
 
-## Features
-- ➕ Add, edit, and delete subscriptions
-- 🗓️ View subscriptions on a calendar
-- 💰 Calculate weekly, monthly, and yearly totals
-- 📊 Detailed summaries per payment account
-- 🖼️ Easy to add icons for each subscription
-- 🔔 Notification system integration with NTFY
-- 💱 Support for multiple currencies
+## Local Setup
 
-## Tech Stack
+Install dependencies:
 
-- ⚛️ Next.js
-- 🔄 React
-- 🗄️ SQLite
-- 🐳 Docker
-- 🎨 Iconify
+```bash
+npm install
+```
 
-## Setup
+Create a D1 database:
 
-### Using Docker Compose
+```bash
+npm run db:create
+```
 
-1. Create a `docker-compose.yml` file with the following content:
+Copy the returned database ID into `wrangler.jsonc` as `database_id`.
 
-   ```yaml
-   version: "3.9"
-   services:
-     app:
-       image: dh1011/subscription-manager:stable
-       ports:
-         - "3000:3000"
-       volumes:
-         - ./data:/app/data
-       restart: unless-stopped
-   ```
+Apply migrations locally:
 
-2. Create the data directory:
-   ```bash
-   mkdir data
-   ```
+```bash
+npm run db:migrate:local
+```
 
-3. Run Docker Compose:
-   ```bash
-   docker-compose up -d
-   ```
+Build the frontend and run the Worker locally:
 
-4. The app will be available at `http://localhost:3000`.
+```bash
+npm run build
+npm run cf:dev
+```
 
----
+Open the Wrangler URL, usually `http://localhost:8787`. The Worker serves the built frontend and the API together. For frontend-only iteration you can run `npm run dev`, but API calls expect a Worker on `127.0.0.1:8787`.
 
-### Manual Setup
+## Deployment
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repo/subscription-manager.git
-   cd subscription-manager
-   ```
+Apply migrations to the remote D1 database:
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+```bash
+npm run db:migrate:remote
+```
 
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+Deploy the Worker and static assets:
 
-4. The app will be available at `http://localhost:3000`.
+```bash
+npm run build
+npm run cf:deploy
+```
 
-## Building for Production
+## Cloudflare Access
 
-1. Build the application:
-   ```bash
-   npm run build
-   ```
+For a real deployment, protect the deployed app with Cloudflare Access:
 
-2. Start the production server:
-   ```bash
-   npm start
-   ```
+1. Go to Cloudflare Zero Trust.
+2. Open Access, then Applications.
+3. Add a self-hosted application.
+4. Use the deployed app domain.
+5. Add a policy that allows only the emails or identity providers you trust.
 
-## Adding Icons
+The Worker reads `Cf-Access-Authenticated-User-Email` and uses that email as `user_id`. Every subscription and setting query is scoped to that user. In local development, the Worker falls back to `DEV_USER_EMAIL` from `wrangler.jsonc`, then `dev@example.com`.
 
-This app uses Iconify icons. To add an icon to your subscription, use the icon name from the [Iconify icon library](https://icon-sets.iconify.design/).
+## API
 
-## Notifications
+- `GET /api/health`
+- `GET /api/subscriptions`
+- `POST /api/subscriptions`
+- `GET /api/subscriptions/:id`
+- `PUT /api/subscriptions/:id`
+- `DELETE /api/subscriptions/:id`
+- `GET /api/user-configuration`
+- `PUT /api/user-configuration`
 
-The app integrates with NTFY for sending notifications. To set up notifications:
+Errors use this shape:
 
-1. Go to the Settings page
-2. Enter your NTFY topic
-3. Save the settings
+```json
+{ "error": "Human readable error message" }
+```
 
-You'll receive notifications for upcoming subscription payments.
+## Migrating From The Original App
 
-Enjoy 🎉!
+The original app uses a local SQLite database. This rewrite uses Cloudflare D1, which is SQLite-compatible but not a direct drop-in for the old app schema.
+
+A basic starting point is:
+
+```bash
+sqlite3 old-subscriptions.db .dump > dump.sql
+```
+
+Review and adjust the dump before importing it into D1. The new schema adds `user_id` and removes notification-related tables and fields.
+
+## Current Limitations
+
+- Notifications, NTFY, email reminders, and scheduled jobs are intentionally removed.
+- There is no import wizard.
+- Currency conversion is not implemented; totals assume each subscription amount is already in the displayed currency.
+- This is intended for a few trusted users behind Cloudflare Access, not a public multi-tenant SaaS product.

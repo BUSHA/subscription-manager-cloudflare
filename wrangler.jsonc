@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "subscription-manager-cf",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-05-21",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "DEV_USER_EMAIL": "dev@example.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "subscription-manager",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+}
