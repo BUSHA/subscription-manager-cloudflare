@@ -358,8 +358,11 @@ code {
   }
 
   .app-title {
-    max-width: 10ch;
-    line-height: 0.95;
-    font-size: clamp(1.8rem, 8vw, 2.5rem);
+    font-size: 1.2em;
+    gap: 4px;
+  }
+
+  .brand-white, .brand-teal {
+    letter-spacing: -0.01em;
   }
 }
