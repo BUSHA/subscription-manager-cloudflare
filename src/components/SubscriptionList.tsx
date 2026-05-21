@@ -7,6 +7,7 @@ import { Icon } from '@iconify-icon/react';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { parseISO, addDays, addWeeks, addMonths, addYears, format } from 'date-fns';
 import { Subscription } from '@/types';
+import { convertCurrencySync } from '@/lib/currencyConverter';
 
 const Container = styled.div`
   background: transparent;
@@ -155,6 +156,7 @@ interface Props {
   onDelete: (id: number) => void;
   onToggleInclude: (id: number) => void;
   showCurrencySymbol: boolean;
+  currency: string;
   onFilteredSubscriptionsChange?: (filteredSubscriptions: Subscription[]) => void;
   onTagFilterChange?: (tags: string[]) => void;
   maxHeight?: string;
@@ -201,9 +203,10 @@ export default function SubscriptionList({
   onDelete,
   onToggleInclude,
   showCurrencySymbol,
+  currency,
   onFilteredSubscriptionsChange,
   onTagFilterChange,
-  maxHeight = '400px'
+  maxHeight = '640px'
 }: Props) {
   const [sortBy, setSortBy] = useState<'dueDate' | 'creditCard' | 'amount' | 'tags'>('dueDate');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
@@ -274,7 +277,17 @@ export default function SubscriptionList({
       case 'creditCard':
         return (a.account || '').localeCompare(b.account || '');
       case 'amount':
-        return b.amount - a.amount;
+        const aAmount = convertCurrencySync(
+          typeof a.amount === 'string' ? parseFloat(a.amount) : a.amount,
+          a.currency || 'USD',
+          currency
+        ) ?? 0;
+        const bAmount = convertCurrencySync(
+          typeof b.amount === 'string' ? parseFloat(b.amount) : b.amount,
+          b.currency || 'USD',
+          currency
+        ) ?? 0;
+        return bAmount - aAmount;
       case 'tags':
         const aTags = a.tags?.join('') || '';
         const bTags = b.tags?.join('') || '';

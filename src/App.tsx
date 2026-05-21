@@ -375,6 +375,7 @@ export default function App() {
           onDelete={handleDeleteSubscription}
           onToggleInclude={handleToggleInclude}
           showCurrencySymbol={userConfig.showCurrencySymbol}
+          currency={userConfig.currency}
           onFilteredSubscriptionsChange={handleFilteredSubscriptionsChange}
           onTagFilterChange={handleTagFilterChange}
         />
