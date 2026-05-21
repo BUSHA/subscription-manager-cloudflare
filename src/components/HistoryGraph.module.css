@@ -7,6 +7,13 @@
   color: #fff;
 }
 
+@media (max-width: 768px) {
+  .graphContainer {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}
+
 .title {
   font-size: 1.25rem;
   font-weight: 600;

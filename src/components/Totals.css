@@ -140,11 +140,16 @@
 
 /* Responsive Styles */
 @media (max-width: 768px) {
+  .totals {
+    padding: 12px;
+  }
+
   .totals-grid {
     flex-direction: column;
   }
 
   .total-card {
+    padding: 16px;
     margin-bottom: 10px;
   }
 

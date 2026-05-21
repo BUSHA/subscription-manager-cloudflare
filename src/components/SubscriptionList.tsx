@@ -14,6 +14,10 @@ const Container = styled.div`
   background: transparent;
   border-radius: 12px;
   padding: 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const Header = styled.div`
