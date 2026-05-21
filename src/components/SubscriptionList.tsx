@@ -8,6 +8,7 @@ import getSymbolFromCurrency from 'currency-symbol-map';
 import { parseISO, addDays, addWeeks, addMonths, addYears, format } from 'date-fns';
 import { Subscription } from '@/types';
 import { convertCurrencySync } from '@/lib/currencyConverter';
+import { getTagColor } from '@/lib/utils';
 
 const Container = styled.div`
   background: transparent;
@@ -83,7 +84,7 @@ const ListContainer = styled.div<{ $maxHeight: string }>`
 const Item = styled(motion.li)`
   border: none;
   border-radius: 8px;
-  padding: 10px;
+  padding: 12px 32px;
   margin-bottom: 10px;
   background: rgba(255, 255, 255, 0.05);
   display: flex;
@@ -349,44 +350,47 @@ export default function SubscriptionList({
               Clear all
             </Badge>
           )}
-          {allTags.map((tag, index) => (
-            <Badge
-              key={index}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '3px 8px',
-                borderRadius: '12px',
-                fontSize: '0.8em',
-                margin: '2px 4px 2px 0',
-                cursor: 'pointer',
-                backgroundColor: tagFilters.includes(tag)
-                  ? 'rgba(255, 140, 0, 0.8)'
-                  : 'rgba(255, 140, 0, 0.2)',
-                color: tagFilters.includes(tag) ? '#fff' : '#FF8C00',
-                fontWeight: tagFilters.includes(tag) ? 'bold' : 'normal',
-                transition: 'all 0.2s ease',
-                boxShadow: 'none',
-              }}
-              onClick={() => handleTagClick(tag)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                if (!tagFilters.includes(tag)) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 140, 0, 0.3)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.transform = 'translateY(0)';
-                if (!tagFilters.includes(tag)) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 140, 0, 0.2)';
-                }
-              }}
-            >
-              {tag}
-            </Badge>
-          ))}
+          {allTags.map((tag, index) => {
+            const tagColor = getTagColor(tag);
+            return (
+              <Badge
+                key={index}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.8em',
+                  margin: '2px 4px 2px 0',
+                  cursor: 'pointer',
+                  backgroundColor: tagFilters.includes(tag) ? tagColor.text : tagColor.bg,
+                  color: tagFilters.includes(tag) ? '#fff' : tagColor.text,
+                  fontWeight: tagFilters.includes(tag) ? 'bold' : 'normal',
+                  transition: 'all 0.2s ease',
+                  boxShadow: 'none',
+                }}
+                onClick={() => handleTagClick(tag)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  if (!tagFilters.includes(tag)) {
+                    e.currentTarget.style.backgroundColor = tagColor.text;
+                    e.currentTarget.style.color = '#fff';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  if (!tagFilters.includes(tag)) {
+                    e.currentTarget.style.backgroundColor = tagColor.bg;
+                    e.currentTarget.style.color = tagColor.text;
+                  }
+                }}
+              >
+                {tag}
+              </Badge>
+            );
+          })}
         </TagsContainer>
       )}
       <ListContainer $maxHeight={maxHeight}>
@@ -488,25 +492,28 @@ export default function SubscriptionList({
                       marginTop: '4px',
                       width: '100%'
                     }}>
-                      {sub.tags.map((tag, index) => (
-                        <Badge
-                          key={index}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            padding: '1px 6px',
-                            borderRadius: '10px',
-                            fontSize: '0.7em',
-                            margin: '2px 4px 2px 0',
-                            whiteSpace: 'nowrap',
-                            height: '18px',
-                            backgroundColor: 'rgba(255, 140, 0, 0.2)',
-                            color: '#FF8C00'
-                          }}
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
+                      {sub.tags.map((tag, index) => {
+                        const tagColor = getTagColor(tag);
+                        return (
+                          <Badge
+                            key={index}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              padding: '1px 6px',
+                              borderRadius: '10px',
+                              fontSize: '0.7em',
+                              margin: '2px 4px 2px 0',
+                              whiteSpace: 'nowrap',
+                              height: '18px',
+                              backgroundColor: tagColor.bg,
+                              color: tagColor.text
+                            }}
+                          >
+                            {tag}
+                          </Badge>
+                        );
+                      })}
                     </div>
                   )}
                 </ItemDetails>

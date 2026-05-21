@@ -63,4 +63,30 @@ export function getRandomColor(): string {
   ];
   
   return colors[Math.floor(Math.random() * colors.length)];
+}
+
+const TAG_COLORS = [
+  { bg: 'rgba(99, 102, 241, 0.2)', text: '#818cf8' },
+  { bg: 'rgba(16, 185, 129, 0.2)', text: '#34d399' },
+  { bg: 'rgba(245, 158, 11, 0.2)', text: '#fbbf24' },
+  { bg: 'rgba(239, 68, 68, 0.2)', text: '#f87171' },
+  { bg: 'rgba(139, 92, 246, 0.2)', text: '#a78bfa' },
+  { bg: 'rgba(236, 72, 153, 0.2)', text: '#f472b6' },
+  { bg: 'rgba(20, 184, 166, 0.2)', text: '#2dd4bf' },
+  { bg: 'rgba(249, 115, 22, 0.2)', text: '#fb923c' },
+  { bg: 'rgba(59, 130, 246, 0.2)', text: '#60a5fa' },
+  { bg: 'rgba(34, 197, 94, 0.2)', text: '#4ade80' },
+  { bg: 'rgba(168, 85, 247, 0.2)', text: '#c084fc' },
+  { bg: 'rgba(244, 63, 94, 0.2)', text: '#fb7185' },
+  { bg: 'rgba(14, 165, 233, 0.2)', text: '#38bdf8' },
+  { bg: 'rgba(234, 179, 8, 0.2)', text: '#facc15' },
+];
+
+export function getTagColor(tag: string): { bg: string; text: string } {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = ((hash << 5) - hash) + tag.charCodeAt(i);
+    hash |= 0;
+  }
+  return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
 } 
