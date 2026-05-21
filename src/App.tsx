@@ -295,7 +295,7 @@ export default function App() {
         <div className="mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)} />
       )}
       <div className="app-header">
-        <h1 className="app-title">Subscription Manager</h1>
+        <h1 className="app-title">Subscription manager</h1>
         <button
           className="burger-button"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

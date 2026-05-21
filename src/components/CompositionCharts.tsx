@@ -92,7 +92,7 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
     const renderChart = (title: string, data: any[]) => (
         <div className={styles.chartCard} style={{ flex: 1, minWidth: '300px' }}>
             <div className={styles.title}>{title}</div>
-            <div className={styles.subtitle}>Monthly Cost Distribution</div>
+            <div className={styles.subtitle}>Monthly cost distribution</div>
             <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
                     <PieChart>
@@ -120,8 +120,8 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
 
     return (
         <div className={styles.pieChartsWrapper}>
-            {renderChart("Spend by Category", categoryData)}
-            {renderChart("Spend by Method", paymentData)}
+            {renderChart("Spend by category", categoryData)}
+            {renderChart("Spend by method", paymentData)}
         </div>
     );
 };

@@ -146,11 +146,11 @@ export default function SubscriptionModal({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <h2>{id ? 'Edit Subscription' : 'Add New Subscription'}</h2>
+        <h2>{id ? 'Edit subscription' : 'Add new subscription'}</h2>
         <p>Enter the details of your subscription</p>
         <form onSubmit={handleSubmit} className={styles.modalForm}>
           <div className={styles.formGroup}>
-            <label htmlFor="name">Subscription Name <span style={{ color: '#ff4444' }}>*</span></label>
+            <label htmlFor="name">Subscription name <span style={{ color: '#ff4444' }}>*</span></label>
             <input
               id="name"
               type="text"
@@ -161,7 +161,7 @@ export default function SubscriptionModal({
             />
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="amount">Recurring Amount <span style={{ color: '#ff4444' }}>*</span></label>
+            <label htmlFor="amount">Recurring amount <span style={{ color: '#ff4444' }}>*</span></label>
             <input
               id="amount"
               type="number"
@@ -173,7 +173,7 @@ export default function SubscriptionModal({
             />
           </div>
           <div className={`${styles.formGroup} ${styles.datePickerGroup}`}>
-            <label htmlFor="dueDate">Billing Date</label>
+            <label htmlFor="dueDate">Billing date</label>
             <DatePicker
               id="dueDate"
               selected={dueDate}
@@ -209,7 +209,7 @@ export default function SubscriptionModal({
             </div>
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="interval">Recurrence Interval</label>
+            <label htmlFor="interval">Recurrence interval</label>
             <div className={styles.intervalInputContainer}>
               <input
                 id="intervalValue"
@@ -232,7 +232,7 @@ export default function SubscriptionModal({
             </div>
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="account">Payment Account</label>
+            <label htmlFor="account">Payment account</label>
             <input
               id="account"
               type="text"
@@ -294,7 +294,7 @@ export default function SubscriptionModal({
           </div>
           <div className={styles.modalActions}>
             <button type="submit" className={styles.submitButton}>
-              {id ? 'Update Subscription' : 'Add Subscription'}
+              {id ? 'Update subscription' : 'Add subscription'}
             </button>
             <button type="button" onClick={onClose} className={styles.cancelButton}>
               Cancel

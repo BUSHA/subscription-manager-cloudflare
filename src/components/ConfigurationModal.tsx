@@ -63,9 +63,9 @@ function ConfigurationModal({
         <h2>Configuration</h2>
         <form onSubmit={handleSubmit} className={styles.modalForm}>
           <div className={styles.configSection}>
-            <h3>Currency Settings</h3>
+            <h3>Currency settings</h3>
             <div className={styles.formGroup}>
-              <label htmlFor="currency-search">Search Currency</label>
+              <label htmlFor="currency-search">Search currency</label>
               <input
                 id="currency-search"
                 type="text"

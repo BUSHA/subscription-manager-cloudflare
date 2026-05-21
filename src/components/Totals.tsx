@@ -235,7 +235,7 @@ function Totals({ subscriptions, currency, showCurrencySymbol, selectedTags, sel
       </div>
 
       <h2 className="detail-summaries-title">
-        Detail Summaries <span className={`period-badge ${selectedPeriod}`}>{selectedPeriod}</span>
+        Detail summaries <span className={`period-badge ${selectedPeriod}`}>{selectedPeriod}</span>
       </h2>
       <div className="account-totals-grid">
         {Object.entries(accountTotals).map(([account, currencies], index) => (

@@ -287,7 +287,7 @@ export default function SubscriptionList({
   return (
     <Container>
       <Header>
-        <Title>Subscriptions List</Title>
+        <Title>Subscriptions list</Title>
         <Controls>
           <label htmlFor="sort-select">Sort by: </label>
           <Select
@@ -295,8 +295,8 @@ export default function SubscriptionList({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           >
-            <option value="dueDate">Due Date</option>
-            <option value="creditCard">Credit Card</option>
+            <option value="dueDate">Due date</option>
+            <option value="creditCard">Credit card</option>
             <option value="amount">Amount</option>
             <option value="tags">Tags</option>
           </Select>
@@ -333,7 +333,7 @@ export default function SubscriptionList({
               }}
             >
               <Icon icon="mdi:close" style={{ marginRight: '4px' }} />
-              Clear All
+              Clear all
             </Badge>
           )}
           {allTags.map((tag, index) => (
