@@ -124,14 +124,20 @@ const CompositionCharts: React.FC<CompositionChartsProps> = ({ subscriptions, cu
                         </Pie>
                         <Tooltip content={renderTooltip(total)} />
                         <Legend
-                            formatter={(value, entry: any) => {
-                                const percent = total > 0 ? ((entry.payload?.value || 0) / total * 100).toFixed(1) : '0.0';
-                                return `${value} (${percent}%)`;
-                            }}
-                            layout="horizontal"
-                            verticalAlign="bottom"
-                            align="center"
-                            wrapperStyle={{ paddingTop: '10px' }}
+                            content={({ payload }: any) => (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0 12px', paddingTop: '10px' }}>
+                                    {data.map((entry, index) => {
+                                        const percent = total > 0 ? ((entry.value / total) * 100).toFixed(1) : '0.0';
+                                        const color = COLORS[index % COLORS.length];
+                                        return (
+                                            <div key={`legend-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+                                                <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', backgroundColor: color }} />
+                                                <span style={{ color: '#ccc', fontSize: '0.85em', whiteSpace: 'nowrap' }}>{entry.name} ({percent}%)</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         />
                     </PieChart>
                 </ResponsiveContainer>
