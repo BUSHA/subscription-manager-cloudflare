@@ -75,6 +75,7 @@ export default function App() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "year">("month");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -100,6 +101,19 @@ export default function App() {
     };
 
     void initializeApp();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsHeaderScrolled(window.scrollY > 4);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const handleSaveSubscription = async (subscription: Subscription) => {
@@ -313,7 +327,12 @@ export default function App() {
       {isMobileMenuOpen && (
         <div className="mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)} />
       )}
-      <div className="app-header">
+      <div
+        className={[
+          "app-header",
+          isHeaderScrolled ? "is-scrolled" : ""
+        ].filter(Boolean).join(" ")}
+      >
         <div className="app-title">
           <span className="brand-white">Subscription</span>
           <span className="brand-teal">Manager</span>

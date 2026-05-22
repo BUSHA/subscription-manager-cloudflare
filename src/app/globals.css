@@ -200,8 +200,6 @@ code {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   z-index: 999;
   animation: fadeInMenu 0.3s ease forwards;
 }
@@ -300,6 +298,7 @@ code {
 /* Responsive Design */
 @media (max-width: 768px) {
   .app {
+    --mobile-header-height: 64px;
     margin-top: 0;
     padding: 16px;
   }
@@ -315,13 +314,19 @@ code {
     flex-direction: row;
     justify-content: space-between;
     width: calc(100% + 32px);
-    background-color: rgba(8, 8, 8, 0.82);
+    background: transparent;
+    box-shadow: none;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .app-header.is-scrolled {
+    background-color: rgba(8, 8, 8, 0.75);
     background-image: url('https://www.transparenttextures.com/patterns/cartographer.png');
     background-repeat: repeat;
     background-size: 300px 300px;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.36);
+    border-bottom: 1px solid #ffffff0a;
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .app-title {
@@ -334,21 +339,18 @@ code {
 
   .header-actions {
     position: fixed;
-    top: 0;
+    top: var(--mobile-header-height);
     right: 0;
-    bottom: 0;
     width: 280px;
-    height: 100vh;
-    height: 100dvh;
-    background: rgba(8, 8, 8, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    height: calc(100vh - var(--mobile-header-height));
+    height: calc(100dvh - var(--mobile-header-height));
+    background: rgba(8, 8, 8, 0.98);
     border-left: 1px solid var(--border-color);
     z-index: 1000;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    padding: 80px 24px 24px;
+    padding: 36px 24px 24px;
     gap: 16px;
     transform: translateX(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -418,6 +420,7 @@ code {
 
 @media (max-width: 480px) {
   .app {
+    --mobile-header-height: 60px;
     padding: 12px;
   }
 
