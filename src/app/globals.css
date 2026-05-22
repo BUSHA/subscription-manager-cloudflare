@@ -315,7 +315,10 @@ code {
     flex-direction: row;
     justify-content: space-between;
     width: calc(100% + 32px);
-    background: rgba(8, 8, 8, 0.88);
+    background-color: rgba(8, 8, 8, 0.82);
+    background-image: url('https://www.transparenttextures.com/patterns/cartographer.png');
+    background-repeat: repeat;
+    background-size: 300px 300px;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.36);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
