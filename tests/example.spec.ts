@@ -1,18 +1,35 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test.beforeEach(async ({ page }) => {
+  await page.route('/api/me', async (route) => {
+    await route.fulfill({
+      json: { id: 'test-user', display_name: 'Test User' },
+    });
+  });
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
+  await page.route('/api/subscriptions', async (route) => {
+    await route.fulfill({ json: { subscriptions: [] } });
+  });
+
+  await page.route('/api/user-configuration', async (route) => {
+    await route.fulfill({
+      json: { configuration: { currency: 'USD', showCurrencySymbol: true } },
+    });
+  });
 });
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test('loads the subscription manager shell', async ({ page }) => {
+  await page.goto('/');
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+  await expect(page).toHaveTitle(/Subscription manager/i);
+  await expect(page.locator('.app-title')).toContainText('SubscriptionManager');
+  await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
+});
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+test('opens settings', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Settings' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Configuration' })).toBeVisible();
 });
