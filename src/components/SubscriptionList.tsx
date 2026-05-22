@@ -51,11 +51,18 @@ const SortLabel = styled.label`
 
 const Select = styled.select`
   padding: 0.5rem;
+  padding-right: 2.25rem;
   border: 1px solid #444;
   border-radius: 4px;
   background: #2c2c2c;
+  background-image: url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%2303DAC6' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 18px;
   color: #fff;
   font-size: 0.9rem;
+  appearance: none;
+  cursor: pointer;
 `;
 
 const TagsContainer = styled.div`
@@ -74,6 +81,7 @@ const List = styled.ul`
 const ListContainer = styled.div``;
 
 const Item = styled(motion.li)`
+  position: relative;
   border: none;
   border-radius: 8px;
   padding: 12px 32px;
@@ -103,6 +111,10 @@ const ItemInfo = styled.div`
   gap: 1rem;
   flex: 1;
   min-width: 200px;
+
+  @media (max-width: 768px) {
+    padding-right: 48px;
+  }
 `;
 
 const ItemDetails = styled.div`
@@ -125,25 +137,104 @@ const ItemActions = styled.div`
   margin-top: 10px;
   flex: 1;
   min-width: 150px;
+
+  @media (max-width: 768px) {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    flex: none;
+    min-width: 0;
+    margin-top: 0;
+  }
+`;
+
+const DesktopActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const MobileActions = styled.div`
+  position: relative;
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const MobileMenuButton = styled.button`
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--primary-color);
+  font-size: 1.35rem;
+
+  &:hover {
+    opacity: 0.82;
+  }
+`;
+
+const MobileMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  display: grid;
+  gap: 2px;
+  min-width: 120px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(32, 32, 32, 0.98);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+`;
+
+const MobileMenuItem = styled.button<{ variant?: 'delete' }>`
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  width: 100%;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: ${props => props.variant === 'delete' ? '#ff6b7f' : '#fff'};
+  font-size: 0.95rem;
+  text-align: left;
+
+  &:hover {
+    background: ${props => props.variant === 'delete' ? 'rgba(233, 69, 96, 0.16)' : 'rgba(255, 255, 255, 0.08)'};
+  }
 `;
 
 const Button = styled.button<{ variant?: 'delete' }>`
   padding: 5px 10px;
-  border: none;
+  border: 1px solid ${props => props.variant === 'delete' ? '#E94560' : 'transparent'};
   border-radius: 5px;
   cursor: pointer;
-  background: ${props => props.variant === 'delete' ? '#E94560' : '#2c2c2c'};
-  color: white;
+  background: ${props => props.variant === 'delete' ? 'transparent' : '#2c2c2c'};
+  color: ${props => props.variant === 'delete' ? '#ff6b7f' : 'white'};
   margin-left: 5px;
 
   &:hover {
-    opacity: 0.9;
+    background: ${props => props.variant === 'delete' ? 'rgba(233, 69, 96, 0.12)' : '#333'};
   }
 
   @media (max-width: 768px) {
+    width: 100%;
     padding: 8px 14px;
     min-height: 44px;
     font-size: 0.95rem;
+    margin-left: 0;
+    text-align: left;
   }
 `;
 
@@ -156,6 +247,89 @@ const Badge = styled.span`
   align-items: center;
   gap: 0.25rem;
   color: #fff;
+`;
+
+const AccountLine = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 5px;
+
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+`;
+
+const MobileDetailTags = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-left: auto;
+  }
+`;
+
+const DetailBadges = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 5px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    gap: 4px 0;
+  }
+`;
+
+const DetailBadge = styled(Badge)<{ $variant?: 'autopay' }>`
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  margin: 2px 5px 2px 0;
+  white-space: nowrap;
+  height: 24px;
+  background-color: ${props => props.$variant === 'autopay' ? 'rgba(69, 183, 209, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
+  color: ${props => props.$variant === 'autopay' ? '#45B7D1' : '#fff'};
+  order: ${props => props.$variant === 'autopay' ? '0' : '-1'};
+
+  @media (max-width: 768px) {
+    height: auto;
+    padding: 0;
+    border-radius: 0;
+    background-color: transparent;
+    font-size: 0.86em;
+    margin: 1px 12px 1px 0;
+  }
+`;
+
+const TagChip = styled(Badge)<{ $bg: string; $color: string }>`
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.7em;
+  margin: 2px 4px 2px 0;
+  white-space: nowrap;
+  height: 18px;
+  background-color: ${props => props.$bg};
+  color: ${props => props.$color};
+
+  @media (max-width: 768px) {
+    margin: 0;
+  }
+`;
+
+const DesktopTagList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 interface Props {
@@ -216,6 +390,7 @@ export default function SubscriptionList({
 }: Props) {
   const [sortBy, setSortBy] = useState<'dueDate' | 'creditCard' | 'amount' | 'tags'>('dueDate');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
+  const [openActionsId, setOpenActionsId] = useState<number | null>(null);
 
   const formatCurrency = (amount: number, currencyCode: string): string => {
     const code = currencyCode || 'USD';
@@ -269,6 +444,21 @@ export default function SubscriptionList({
       onTagFilterChange(tagFilters);
     }
   }, [filteredSubscriptions, onFilteredSubscriptionsChange, tagFilters, onTagFilterChange]);
+
+  useEffect(() => {
+    if (openActionsId === null) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Element && event.target.closest('[data-subscription-actions]')) {
+        return;
+      }
+
+      setOpenActionsId(null);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [openActionsId]);
 
   const sortedSubscriptions = [...filteredSubscriptions].sort((a, b) => {
     switch (sortBy) {
@@ -445,24 +635,12 @@ export default function SubscriptionList({
                   </div>
                 </ItemInfo>
                 <ItemDetails>
-                  <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: '5px' }}>
+                  <AccountLine>
                     <Icon icon="mdi:credit-card" style={{ marginRight: '5px', color: '#45B7D1' }} />
                     <span style={{ color: '#ccc' }}>{sub.account || 'Not Specified'}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', marginTop: '5px' }}>
-                    <Badge style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      fontSize: '0.8em',
-                      margin: '2px 5px 2px 0',
-                      whiteSpace: 'nowrap',
-                      height: '24px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      color: '#fff',
-                      order: -1
-                    }}>
+                  </AccountLine>
+                  <DetailBadges>
+                    <DetailBadge>
                       {(() => {
                         const nextDueDate = getNextDueDate(sub);
                         if (nextDueDate) {
@@ -471,62 +649,84 @@ export default function SubscriptionList({
                           return 'No due date';
                         }
                       })()}
-                    </Badge>
+                    </DetailBadge>
                     {Boolean(sub.autopay) && (
-                      <Badge style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '2px 8px',
-                        borderRadius: '12px',
-                        fontSize: '0.8em',
-                        margin: '2px 5px 2px 0',
-                        whiteSpace: 'nowrap',
-                        height: '24px',
-                        backgroundColor: 'rgba(69, 183, 209, 0.2)',
-                        color: '#45B7D1'
-                      }}>
+                      <DetailBadge $variant="autopay">
                         <Icon icon="mdi:auto-pay" style={{ marginRight: '3px' }} />
                         Auto-pay
-                      </Badge>
+                      </DetailBadge>
                     )}
-                  </div>
+                    {sub.tags && sub.tags.length > 0 && (
+                      <MobileDetailTags>
+                        {sub.tags.map((tag, index) => {
+                          const tagColor = getTagColor(tag);
+                          return (
+                            <TagChip key={index} $bg={tagColor.bg} $color={tagColor.text}>
+                              {tag}
+                            </TagChip>
+                          );
+                        })}
+                      </MobileDetailTags>
+                    )}
+                  </DetailBadges>
                   {sub.tags && sub.tags.length > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      marginTop: '4px',
-                      width: '100%'
-                    }}>
+                    <DesktopTagList>
                       {sub.tags.map((tag, index) => {
                         const tagColor = getTagColor(tag);
                         return (
-                          <Badge
+                          <TagChip
                             key={index}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              padding: '1px 6px',
-                              borderRadius: '10px',
-                              fontSize: '0.7em',
-                              margin: '2px 4px 2px 0',
-                              whiteSpace: 'nowrap',
-                              height: '18px',
-                              backgroundColor: tagColor.bg,
-                              color: tagColor.text
-                            }}
+                            $bg={tagColor.bg}
+                            $color={tagColor.text}
                           >
                             {tag}
-                          </Badge>
+                          </TagChip>
                         );
                       })}
-                    </div>
+                    </DesktopTagList>
                   )}
                 </ItemDetails>
-                <ItemActions>
-                  <Button onClick={() => onEdit(sub)}>Edit</Button>
-                  <Button variant="delete" onClick={() => onDelete(sub.id!)}>
-                    Delete
-                  </Button>
+                <ItemActions data-subscription-actions>
+                  <DesktopActions>
+                    <Button onClick={() => onEdit(sub)}>Edit</Button>
+                    <Button variant="delete" onClick={() => onDelete(sub.id!)}>
+                      Delete
+                    </Button>
+                  </DesktopActions>
+                  <MobileActions>
+                    <MobileMenuButton
+                      type="button"
+                      aria-label={`Open actions for ${sub.name}`}
+                      aria-haspopup="menu"
+                      aria-expanded={openActionsId === sub.id}
+                      onClick={() => setOpenActionsId((current) => (current === sub.id ? null : sub.id!))}
+                    >
+                      <Icon icon="mdi:dots-vertical" />
+                    </MobileMenuButton>
+                    {openActionsId === sub.id && (
+                      <MobileMenu role="menu">
+                        <MobileMenuItem
+                          role="menuitem"
+                          onClick={() => {
+                            setOpenActionsId(null);
+                            onEdit(sub);
+                          }}
+                        >
+                          Edit
+                        </MobileMenuItem>
+                        <MobileMenuItem
+                          role="menuitem"
+                          variant="delete"
+                          onClick={() => {
+                            setOpenActionsId(null);
+                            onDelete(sub.id!);
+                          }}
+                        >
+                          Delete
+                        </MobileMenuItem>
+                      </MobileMenu>
+                    )}
+                  </MobileActions>
                 </ItemActions>
               </Item>
             ))}

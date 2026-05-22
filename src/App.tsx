@@ -328,33 +328,6 @@ export default function App() {
         </button>
         <div className={`header-actions ${isMobileMenuOpen ? "open" : ""}`}>
           <button
-            className="export-button"
-            onClick={() => {
-              handleExport();
-              setIsMobileMenuOpen(false);
-            }}
-            data-label="Export"
-            aria-label="Export"
-          >
-            <Icon icon="mdi:download" className="export-icon" />
-            <span>Export</span>
-          </button>
-
-          <label className="import-button" data-label="Import" aria-label="Import">
-            <Icon icon="mdi:upload" className="import-icon" />
-            <span>Import</span>
-            <input
-              type="file"
-              accept=".json"
-              onChange={(e) => {
-                handleImport(e);
-                setIsMobileMenuOpen(false);
-              }}
-              className="import-input"
-            />
-          </label>
-
-          <button
             className="config-button"
             onClick={() => {
               setIsConfigModalOpen(true);
@@ -438,6 +411,8 @@ export default function App() {
           currency={userConfig.currency}
           showCurrencySymbol={userConfig.showCurrencySymbol}
           onSave={handleConfigurationSave}
+          onExport={handleExport}
+          onImport={handleImport}
         />
       ) : null}
 

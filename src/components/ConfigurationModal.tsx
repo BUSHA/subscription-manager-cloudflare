@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import styles from './ConfigurationModal.module.css';
 import getSymbolFromCurrency from 'currency-symbol-map/currency-symbol-map';
 import currencyList from 'currency-symbol-map/map';
+import { Icon } from '@iconify-icon/react';
 
 
 interface ConfigurationModalProps {
@@ -14,6 +15,8 @@ interface ConfigurationModalProps {
     currency: string;
     showCurrencySymbol: boolean;
   }) => void;
+  onExport: () => void;
+  onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 function ConfigurationModal({ 
@@ -21,7 +24,9 @@ function ConfigurationModal({
   onClose, 
   currency, 
   showCurrencySymbol, 
-  onSave 
+  onSave,
+  onExport,
+  onImport
 }: ConfigurationModalProps) {
   const [selectedCurrency, setSelectedCurrency] = useState(currency);
   const [searchTerm, setSearchTerm] = useState('');
@@ -114,12 +119,31 @@ function ConfigurationModal({
               </label>
             </div>
           </div>
+          <div className={styles.configSection}>
+            <h3>Data</h3>
+            <div className={styles.dataActions}>
+              <button type="button" className={styles.dataButton} onClick={onExport}>
+                <Icon icon="mdi:download" />
+                Export
+              </button>
+              <label className={styles.dataButton}>
+                <Icon icon="mdi:upload" />
+                Import
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={onImport}
+                  className={styles.fileInput}
+                />
+              </label>
+            </div>
+          </div>
           <div className={styles.modalActions}>
-            <button type="submit" className={styles.submitButton}>
-              Save
-            </button>
             <button type="button" onClick={onClose} className={styles.cancelButton}>
               Cancel
+            </button>
+            <button type="submit" className={styles.submitButton}>
+              Save
             </button>
           </div>
         </form>

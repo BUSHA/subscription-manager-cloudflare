@@ -47,6 +47,40 @@
   margin-bottom: 10px;
 }
 
+.dataActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dataButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #03DAC6;
+  border-radius: 5px;
+  background: transparent;
+  color: #03DAC6;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dataButton:hover {
+  background: rgba(3, 218, 198, 0.12);
+}
+
+.dataButton svg {
+  font-size: 1.15em;
+}
+
+.fileInput {
+  display: none;
+}
+
 .formGroup {
   margin-bottom: 15px;
 }
@@ -75,7 +109,9 @@
 
 .modalActions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
   margin-top: 20px;
 }
 
@@ -216,12 +252,17 @@ input:checked + .toggleSlider:before {
     max-height: 160px;
   }
 
+  .dataActions {
+    grid-template-columns: 1fr;
+  }
+
   .switchLabel {
     align-items: flex-start;
   }
 
   .modalActions {
     flex-direction: column-reverse;
+    align-items: stretch;
     gap: 10px;
   }
 
