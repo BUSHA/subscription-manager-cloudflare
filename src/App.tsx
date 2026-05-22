@@ -186,6 +186,21 @@ export default function App() {
     setIsModalOpen(true);
   };
 
+  const handleSummariesJump = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+
+    const summaries = document.getElementById("summaries");
+    if (!summaries) {
+      return;
+    }
+
+    event.preventDefault();
+    summaries.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+  }, []);
+
   const handleExport = () => {
     const data = JSON.stringify(subscriptions, null, 2);
     const blob = new Blob([data], { type: "application/json" });
@@ -369,6 +384,9 @@ export default function App() {
       </div>
       <div className="content-container">
         <CalendarGrid subscriptions={subscriptions} onDateClick={handleDateClick} currentDate={selectedDate} />
+        <div className="calendar-summary-link">
+          <a href="#summaries" onClick={handleSummariesJump}>Jump to summaries</a>
+        </div>
         <SubscriptionList
           subscriptions={subscriptions}
           onEdit={(subscription) => {
@@ -382,14 +400,16 @@ export default function App() {
           onFilteredSubscriptionsChange={handleFilteredSubscriptionsChange}
           onTagFilterChange={handleTagFilterChange}
         />
-        <Totals
-          subscriptions={filteredSubscriptions || subscriptions}
-          currency={userConfig.currency}
-          showCurrencySymbol={userConfig.showCurrencySymbol}
-          selectedTags={selectedTags}
-          selectedPeriod={selectedPeriod}
-          onPeriodChange={setSelectedPeriod}
-        />
+        <section id="summaries" className="summaries-anchor">
+          <Totals
+            subscriptions={filteredSubscriptions || subscriptions}
+            currency={userConfig.currency}
+            showCurrencySymbol={userConfig.showCurrencySymbol}
+            selectedTags={selectedTags}
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
+          />
+        </section>
         <CostTrendGraph
           subscriptions={filteredSubscriptions || subscriptions}
           selectedPeriod={selectedPeriod}

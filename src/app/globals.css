@@ -28,6 +28,10 @@ body {
   color: var(--text-color);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -214,6 +218,38 @@ code {
   padding-bottom: 2rem;
 }
 
+.calendar-summary-link {
+  display: flex;
+  justify-content: center;
+  margin: 18px 0 4px;
+}
+
+.calendar-summary-link a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(3, 218, 198, 0.65);
+  border-radius: 5px;
+  color: #03DAC6;
+  text-decoration: none;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.calendar-summary-link a:hover {
+  background-color: #03DAC6;
+  border-color: #03DAC6;
+  color: #080808;
+}
+
+.summaries-anchor {
+  scroll-margin-top: 18px;
+}
+
 .add-button {
   position: fixed;
   bottom: 2rem;
@@ -332,6 +368,20 @@ code {
 
   .content-container {
     padding: 0;
+  }
+
+  .calendar-summary-link {
+    margin: 18px 0 18px;
+  }
+
+  .calendar-summary-link a {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .summaries-anchor {
+    scroll-margin-top: 120px;
   }
 
   .add-button {

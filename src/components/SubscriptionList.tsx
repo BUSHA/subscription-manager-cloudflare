@@ -71,25 +71,7 @@ const List = styled.ul`
   margin: 0;
 `;
 
-const ListContainer = styled.div<{ $maxHeight: string }>`
-  max-height: ${props => props.$maxHeight};
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-  }
-`;
+const ListContainer = styled.div``;
 
 const Item = styled(motion.li)`
   border: none;
@@ -185,7 +167,6 @@ interface Props {
   currency: string;
   onFilteredSubscriptionsChange?: (filteredSubscriptions: Subscription[]) => void;
   onTagFilterChange?: (tags: string[]) => void;
-  maxHeight?: string;
 }
 
 function getNextDueDate(subscription: Subscription): Date | null {
@@ -231,8 +212,7 @@ export default function SubscriptionList({
   showCurrencySymbol,
   currency,
   onFilteredSubscriptionsChange,
-  onTagFilterChange,
-  maxHeight = '640px'
+  onTagFilterChange
 }: Props) {
   const [sortBy, setSortBy] = useState<'dueDate' | 'creditCard' | 'amount' | 'tags'>('dueDate');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
@@ -418,7 +398,7 @@ export default function SubscriptionList({
           })}
         </TagsContainer>
       )}
-      <ListContainer $maxHeight={maxHeight}>
+      <ListContainer>
         <List>
           <AnimatePresence>
             {sortedSubscriptions.map((sub) => (
