@@ -48,6 +48,11 @@ function CalendarGrid({ subscriptions, onDateClick, currentDate }: CalendarGridP
         // Get interval info - check both camelCase and snake_case properties
         const intervalUnit = sub.intervalUnit || sub.interval_unit || 'months';
         const intervalValue = sub.intervalValue || sub.interval_value || 1;
+        const intervalValueNumber = typeof intervalValue === 'string' ? parseInt(intervalValue, 10) : intervalValue;
+
+        if (!Number.isFinite(intervalValueNumber) || intervalValueNumber <= 0) {
+          return;
+        }
         
         while (currentDate <= endDate) {
           if (isSameMonth(currentDate, new Date(year, month))) {
@@ -63,13 +68,11 @@ function CalendarGrid({ subscriptions, onDateClick, currentDate }: CalendarGridP
               color: sub.color,
               dueDate: dueDate,
               intervalUnit: intervalUnit,
-              intervalValue: typeof intervalValue === 'string' ? parseInt(intervalValue, 10) : intervalValue
+              intervalValue: intervalValueNumber
             });
           }
 
           // Move to the next occurrence based on the interval
-          const intervalValueNumber = typeof intervalValue === 'string' ? parseInt(intervalValue, 10) : intervalValue;
-          
           switch (intervalUnit) {
             case 'days':
               currentDate = addDays(currentDate, intervalValueNumber);
@@ -120,6 +123,14 @@ function CalendarGrid({ subscriptions, onDateClick, currentDate }: CalendarGridP
               key={day}
               className={`${styles.calendarDay} ${isToday ? styles.today : ''}`}
               onClick={() => onDateClick(new Date(year, month, day))}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onDateClick(new Date(year, month, day));
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
               <div className={styles.dateNumber}>{day}</div>
               <div className={styles.subscriptions}>

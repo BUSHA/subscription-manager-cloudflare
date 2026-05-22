@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import styles from './ConfigurationModal.module.css';
 import getSymbolFromCurrency from 'currency-symbol-map/currency-symbol-map';
@@ -31,6 +31,7 @@ function ConfigurationModal({
   const [selectedCurrency, setSelectedCurrency] = useState(currency);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedShowCurrencySymbol, setSelectedShowCurrencySymbol] = useState(showCurrencySymbol);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -126,16 +127,21 @@ function ConfigurationModal({
                 <Icon icon="mdi:download" />
                 Export
               </button>
-              <label className={styles.dataButton}>
+              <button
+                type="button"
+                className={styles.dataButton}
+                onClick={() => importInputRef.current?.click()}
+              >
                 <Icon icon="mdi:upload" />
                 Import
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={onImport}
-                  className={styles.fileInput}
-                />
-              </label>
+              </button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept=".json"
+                onChange={onImport}
+                className={styles.fileInput}
+              />
             </div>
           </div>
           <div className={styles.modalActions}>
